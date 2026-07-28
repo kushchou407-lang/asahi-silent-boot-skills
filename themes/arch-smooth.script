@@ -35,10 +35,10 @@ frame = 0;
 
 fun refresh_callback() {
     frame++;
-    rotation = frame * 0.10;   // Smooth, elegant orbital rotation (~2s per orbit)
+    rotation = frame * 0.10;   // Smooth, elegant orbital rotation
 
     for (i = 0; i < num_dots; i++) {
-        angle   = rotation + (i * 2.0 * Math.Pi / num_dots);
+        angle   = rotation + (i * 2.0 * 3.14159265 / num_dots);
         x       = ring_cx + Math.Cos(angle) * ring_radius;
         y       = ring_cy + Math.Sin(angle) * ring_radius;
         // Comet tail effect: leading dot is bright, trailing dots fade smoothly

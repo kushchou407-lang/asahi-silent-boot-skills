@@ -1,8 +1,17 @@
 // arch-smooth.script — Perfectly centered Arch Linux logo with orbital spinner
-// Uses script module with sin/cos math for smooth fluid motion
+// Uses fallback screen dimensions when Plymouth.GetWidth() returns 0 in early initramfs
 
 screen_width  = Plymouth.GetWidth();
 screen_height = Plymouth.GetHeight();
+
+// Fallback to MacBook retina resolution if early DRM query returns 0/1
+if (screen_width <= 100) {
+    screen_width = 2560;
+}
+if (screen_height <= 100) {
+    screen_height = 1664;
+}
+
 cx = screen_width / 2;
 cy = screen_height / 2;
 
@@ -21,8 +30,6 @@ dot_h   = dot_img.GetHeight();
 
 num_dots    = 12;
 ring_radius = 95;
-ring_cx     = cx;
-ring_cy     = cy;
 
 for (i = 0; i < num_dots; i++) {
     dot_sprite[i] = Sprite(dot_img);
@@ -37,10 +44,20 @@ fun refresh_callback() {
     frame++;
     rotation = frame * 0.10;   // Smooth, elegant orbital rotation
 
+    // Re-check width/height in case DRM mode changes dynamically
+    w = Plymouth.GetWidth();
+    h = Plymouth.GetHeight();
+    if (w > 100) {
+        cx = w / 2;
+        cy = h / 2;
+        logo_sprite.SetX(Math.Int(cx - 60));
+        logo_sprite.SetY(Math.Int(cy - 60));
+    }
+
     for (i = 0; i < num_dots; i++) {
         angle   = rotation + (i * 2.0 * 3.14159265 / num_dots);
-        x       = ring_cx + Math.Cos(angle) * ring_radius;
-        y       = ring_cy + Math.Sin(angle) * ring_radius;
+        x       = cx + Math.Cos(angle) * ring_radius;
+        y       = cy + Math.Sin(angle) * ring_radius;
         // Comet tail effect: leading dot is bright, trailing dots fade smoothly
         opacity = Math.Pow((i + 1.0) / num_dots, 1.6);
 

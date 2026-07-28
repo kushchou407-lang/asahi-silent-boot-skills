@@ -1,0 +1,60 @@
+// arch-smooth.script — Perfectly centered Arch Linux logo with orbital spinner
+// Uses script module with sin/cos math for smooth fluid motion
+
+screen_width  = Plymouth.GetWidth();
+screen_height = Plymouth.GetHeight();
+cx = screen_width / 2;
+cy = screen_height / 2;
+
+// ── Arch Linux Logo (Dead-Center) ───────────────────────────────────────────
+logo = Image("logo.png");
+logo_scaled = logo.Scale(120, 120);
+logo_sprite = Sprite(logo_scaled);
+logo_sprite.SetX(Math.Int(cx - 60));
+logo_sprite.SetY(Math.Int(cy - 60));
+logo_sprite.SetZ(10);
+
+// ── Orbital Spinner Dots (Concentric Ring around Logo) ───────────────────────
+dot_img = Image("dot.png");
+dot_w   = dot_img.GetWidth();
+dot_h   = dot_img.GetHeight();
+
+num_dots    = 12;
+ring_radius = 95;
+ring_cx     = cx;
+ring_cy     = cy;
+
+for (i = 0; i < num_dots; i++) {
+    dot_sprite[i] = Sprite(dot_img);
+    dot_sprite[i].SetZ(11);
+    dot_sprite[i].SetOpacity(0);
+}
+
+// ── Animation Loop ───────────────────────────────────────────────────────────
+frame = 0;
+
+fun refresh_callback() {
+    frame++;
+    rotation = frame * 0.10;   // Smooth, elegant orbital rotation (~2s per orbit)
+
+    for (i = 0; i < num_dots; i++) {
+        angle   = rotation + (i * 2.0 * Math.Pi / num_dots);
+        x       = ring_cx + Math.Cos(angle) * ring_radius;
+        y       = ring_cy + Math.Sin(angle) * ring_radius;
+        // Comet tail effect: leading dot is bright, trailing dots fade smoothly
+        opacity = Math.Pow((i + 1.0) / num_dots, 1.6);
+
+        dot_sprite[i].SetX(Math.Int(x - dot_w / 2));
+        dot_sprite[i].SetY(Math.Int(y - dot_h / 2));
+        dot_sprite[i].SetOpacity(opacity);
+    }
+}
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+// ── Suppress all text messages ───────────────────────────────────────────────
+fun display_normal_callback() {}
+fun message_callback(text)    {}
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+Plymouth.SetMessageFunction(message_callback);
